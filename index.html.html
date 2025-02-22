@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Background Removal Tool</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* Ad Placements */
+    .ad {
+      background-color: #ddd;
+      text-align: center;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    /* Main Content */
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .upload-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .upload-section input[type="file"] {
+      display: none;
+    }
+
+    .upload-section label {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .image-preview {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .image-preview img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    .download-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    .download-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      margin-top: 20px;
+    }
+
+    /* Popup Styles */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      z-index: 1000;
+      text-align: center;
+    }
+
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .popup button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    /* Guide Text Box */
+    .guide-box {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .guide-box h3 {
+      margin-top: 0;
+      color: #4CAF50;
+    }
+
+    .guide-box ul {
+      padding-left: 20px;
+    }
+
+    .guide-box ul li {
+      margin-bottom: 10px;
+    }
+
+    /* Loading Spinner */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    Image Background Removal Tool
+  </div>
+
+  <!-- Top Ad -->
+  <div class="ad">
+    Google Ad Here
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="upload-section">
+      <label for="image-upload">Upload Image</label>
+      <input type="file" id="image-upload" accept="image/*">
+    </div>
+
+    <div class="image-preview" id="image-preview">
+      <!-- Image will be displayed here -->
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loader" id="loader"></div>
+
+    <button class="download-btn" id="download-btn" disabled>Download Image</button>
+
+    <!-- Image Count -->
+    <p id="image-count">Images Processed: 0/50</p>
+  </div>
+
+  <!-- Guide Text Box -->
+  <div class="guide-box">
+    <h3>How to Use This Tool:</h3>
+    <ul>
+      <li>Click the <strong>"Upload Image"</strong> button to select an image from your device.</li>
+      <li>Wait for the image to be processed and previewed.</li>
+      <li>Click the <strong>"Download Image"</strong> button to save the background-removed image.</li>
+      <li>You can process up to <strong>50 images</strong> per session.</li>
+    </ul>
+  </div>
+
+  <!-- Bottom Ad -->
+  <div class="ad">
+    Google Ad Here
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2023 Image Background Removal Tool. All rights reserved.
+  </footer>
+
+  <!-- Popup -->
+  <div class="popup-overlay" id="popup-overlay"></div>
+  <div class="popup" id="popup">
+    <h2>Limit Reached!</h2>
+    <p>You have processed the maximum number of images (50). Please try again later.</p>
+    <button onclick="closePopup()">Close</button>
+  </div>
+
+  <script>
+    // JavaScript for Image Upload, Preview, Download, and Count
+    const imageUpload = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+    const downloadBtn = document.getElementById('download-btn');
+    const imageCount = document.getElementById('image-count');
+    const popup = document.getElementById('popup');
+    const popupOverlay = document.getElementById('popup-overlay');
+    const loader = document.getElementById('loader');
+    let imageUrl = null;
+    let adShown = false;
+    let processedCount = 0;
+
+    // Handle Image Upload
+    imageUpload.addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        if (processedCount >= 50) {
+          showPopup();
+          return;
+        }
+
+        // Show loader
+        loader.style.display = 'block';
+        imagePreview.innerHTML = '';
+        downloadBtn.disabled = true;
+
+        // Prepare form data for API
+        const formData = new FormData();
+        formData.append('image_file', file);
+
+        // Call Remove.bg API
+        fetch('https://api.remove.bg/v1.0/removebg', {
+          method: 'POST',
+          headers: {
+            'X-Api-Key': 'rfqjVmkjbLGqYzzvD7zGiWbz', // Replace with your API key
+          },
+          body: formData,
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Failed to remove background');
+            }
+            return response.blob();
+          })
+          .then((blob) => {
+            // Create object URL for the processed image
+            imageUrl = URL.createObjectURL(blob);
+            imagePreview.innerHTML = `<img src="${imageUrl}" alt="Background Removed Image">`;
+            downloadBtn.disabled = false;
+            processedCount++;
+            imageCount.textContent = `Images Processed: ${processedCount}/50`;
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            alert('Failed to remove background. Please try again.');
+          })
+          .finally(() => {
+            // Hide loader
+            loader.style.display = 'none';
+          });
+      }
+    });
+
+    // Handle Download Button Click
+    downloadBtn.addEventListener('click', function () {
+      if (!adShown) {
+        alert('Please wait, showing ad...');
+        adShown = true;
+      } else {
+        if (imageUrl) {
+          const link = document.createElement('a');
+          link.href = imageUrl;
+          link.download = 'background-removed-image.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+    });
+
+    // Show Popup
+    function showPopup() {
+      popup.style.display = 'block';
+      popupOverlay.style.display = 'block';
+    }
+
+    // Close Popup
+    function closePopup() {
+      popup.style.display = 'none';
+      popupOverlay.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
