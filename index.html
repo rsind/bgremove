@@ -59,6 +59,27 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
+      margin: 5px;
+    }
+
+    .upload-section input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .upload-section button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
     }
 
     .image-preview {
@@ -142,7 +163,7 @@
       border-radius: 8px;
       padding: 15px;
       margin: 20px 0;
-      text-align: left;
+      text-align: center; /* Center-align text */
     }
 
     .guide-box h3 {
@@ -151,7 +172,8 @@
     }
 
     .guide-box ul {
-      padding-left: 20px;
+      list-style-type: none; /* Remove bullet points */
+      padding-left: 0;
     }
 
     .guide-box ul li {
@@ -192,6 +214,9 @@
     <div class="upload-section">
       <label for="image-upload">Upload Image</label>
       <input type="file" id="image-upload" accept="image/*">
+      <p>OR</p>
+      <input type="text" id="image-url" placeholder="Paste image URL here">
+      <button id="process-url">Process URL</button>
     </div>
 
     <div class="image-preview" id="image-preview">
@@ -212,6 +237,7 @@
     <h3>How to Use This Tool:</h3>
     <ul>
       <li>Click the <strong>"Upload Image"</strong> button to select an image from your device.</li>
+      <li>Or paste an image URL in the text box and click <strong>"Process URL"</strong>.</li>
       <li>Wait for the image to be processed and previewed.</li>
       <li>Click the <strong>"Download Image"</strong> button to save the background-removed image.</li>
       <li>You can process up to <strong>50 images</strong> per session.</li>
@@ -237,8 +263,10 @@
   </div>
 
   <script>
-    // JavaScript for Image Upload, Preview, Download, and Count
+    // JavaScript for Image Upload, URL Processing, Preview, Download, and Count
     const imageUpload = document.getElementById('image-upload');
+    const imageUrlInput = document.getElementById('image-url');
+    const processUrlBtn = document.getElementById('process-url');
     const imagePreview = document.getElementById('image-preview');
     const downloadBtn = document.getElementById('download-btn');
     const imageCount = document.getElementById('image-count');
@@ -253,52 +281,75 @@
     imageUpload.addEventListener('change', function (event) {
       const file = event.target.files[0];
       if (file) {
-        if (processedCount >= 50) {
-          showPopup();
-          return;
-        }
-
-        // Show loader
-        loader.style.display = 'block';
-        imagePreview.innerHTML = '';
-        downloadBtn.disabled = true;
-
-        // Prepare form data for API
-        const formData = new FormData();
-        formData.append('image_file', file);
-
-        // Call Remove.bg API
-        fetch('https://api.remove.bg/v1.0/removebg', {
-          method: 'POST',
-          headers: {
-            'X-Api-Key': 'rfqjVmkjbLGqYzzvD7zGiWbz', // Replace with your API key
-          },
-          body: formData,
-        })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error('Failed to remove background');
-            }
-            return response.blob();
-          })
-          .then((blob) => {
-            // Create object URL for the processed image
-            imageUrl = URL.createObjectURL(blob);
-            imagePreview.innerHTML = `<img src="${imageUrl}" alt="Background Removed Image">`;
-            downloadBtn.disabled = false;
-            processedCount++;
-            imageCount.textContent = `Images Processed: ${processedCount}/50`;
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-            alert('Failed to remove background. Please try again.');
-          })
-          .finally(() => {
-            // Hide loader
-            loader.style.display = 'none';
-          });
+        processImage(file);
       }
     });
+
+    // Handle URL Processing
+    processUrlBtn.addEventListener('click', function () {
+      const url = imageUrlInput.value.trim();
+      if (url) {
+        fetch(url)
+          .then((response) => response.blob())
+          .then((blob) => {
+            processImage(blob);
+          })
+          .catch((error) => {
+            console.error('Error fetching image from URL:', error);
+            alert('Failed to fetch image from URL. Please check the URL and try again.');
+          });
+      } else {
+        alert('Please enter a valid image URL.');
+      }
+    });
+
+    // Process Image (Upload or URL)
+    function processImage(imageBlob) {
+      if (processedCount >= 50) {
+        showPopup();
+        return;
+      }
+
+      // Show loader
+      loader.style.display = 'block';
+      imagePreview.innerHTML = '';
+      downloadBtn.disabled = true;
+
+      // Prepare form data for API
+      const formData = new FormData();
+      formData.append('image_file', imageBlob);
+
+      // Call Remove.bg API
+      fetch('https://api.remove.bg/v1.0/removebg', {
+        method: 'POST',
+        headers: {
+          'X-Api-Key': 'rfqjVmkjbLGqYzzvD7zGiWbz', // Replace with your API key
+        },
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Failed to remove background');
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          // Create object URL for the processed image
+          imageUrl = URL.createObjectURL(blob);
+          imagePreview.innerHTML = `<img src="${imageUrl}" alt="Background Removed Image">`;
+          downloadBtn.disabled = false;
+          processedCount++;
+          imageCount.textContent = `Images Processed: ${processedCount}/50`;
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          alert('Failed to remove background. Please try again.');
+        })
+        .finally(() => {
+          // Hide loader
+          loader.style.display = 'none';
+        });
+    }
 
     // Handle Download Button Click
     downloadBtn.addEventListener('click', function () {
